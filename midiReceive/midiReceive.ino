@@ -1,10 +1,14 @@
   #include "MIDIUSB.h"
   #include "pitchToFrequency.h"
+  #include "Tone.h"
 // First parameter is the event type (0x09 = note on, 0x08 = note off).
 // Second parameter is note-on/note-off, combined with the channel.
 // Channel can be anything between 0-15. Typically reported to the user as 1-16.
 // Third parameter is the note number (48 = middle C).
 // Fourth parameter is the velocity (64 = normal, 127 = fastest).
+
+Tone notePlayer[4];
+uint16_t freq[4];
 
 void noteOn(byte channel, byte pitch, byte velocity) {
   midiEventPacket_t noteOn = {0x09, 0x90 | channel, pitch, velocity};
@@ -18,8 +22,10 @@ void noteOff(byte channel, byte pitch, byte velocity) {
 
 void setup() {
   Serial.begin(115200);
-  pinMode(2,OUTPUT);
-  //tone(2,500);
+  notePlayer[0].begin(2);
+  notePlayer[1].begin(3);
+  notePlayer[2].begin(4);
+  notePlayer[3].begin(5);
 }
 
 // First parameter is the event type (0x0B = control change).
@@ -38,19 +44,39 @@ void loop() {
     rx = MidiUSB.read();
     if (rx.header != 0) {
       Serial.print("Received: ");
-      //Serial.print(rx.header, HEX);
-      //Serial.print("-");
+      Serial.print(rx.header, HEX);
+      Serial.print("-");
       Serial.print(rx.byte1, HEX);//on off
       Serial.print("-");
       Serial.print(pitchFrequency[rx.byte2]);//note
       Serial.print("-");
       Serial.println(rx.byte3, HEX);//velocity
-      if (rx.header == 0x9){
-        tone(2,pitchFrequency[rx.byte2]);
-      }
-      if (rx.header == 0x8){
-        noTone(2);
-      }
+
+      on_off_event(pitchFrequency[rx.byte2], rx.header);
     }
   } while (rx.header != 0);
+}
+void on_off_event(uint16_t frequency, uint8_t header){
+
+  if (header == 0x9){// if on
+    for(uint8_t i=0;i<4;i++){
+      if (!notePlayer[i].isPlaying()){//if not playing
+        Serial.print("Tone gen: ");
+        Serial.println(i);
+        notePlayer[i].play(frequency);
+        freq[i] = frequency;
+        break;
+      }
+    }
+  }
+  if (header == 0x8){// if off
+    for(uint8_t i=0;i<4;i++){
+      if (freq[i] == frequency){//if exists
+        Serial.print("Tone gen stop: ");
+        Serial.println(i);
+        notePlayer[i].stop();
+        break;
+      }
+    }
+  }
 }

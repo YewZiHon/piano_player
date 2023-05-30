@@ -1,20 +1,22 @@
 #include <Wire.h>
 #include "HCPCA9685.h"
+#include "HCPCA9685_2.h"
 #include "MIDIUSB.h"
 #define SERVO_ON 307
 #define SERVO_OFF 205
 #define SERVO_FREQ 50
 
 HCPCA9685 HCPCA9685(0x44);
+HCPCA9685_2 HCPCA9685_2(0x42);
 
 void setup() {
   Serial.begin(115200);
   
   HCPCA9685.Init(SERVO_MODE);
-
-  /* Wake the device up */
   HCPCA9685.Sleep(false);
-  HCPCA9685.Servo(0, 100);
+
+  HCPCA9685_2.Init(SERVO_MODE);
+  HCPCA9685_2.Sleep(false);
 
   delay(10);
 }
@@ -51,9 +53,13 @@ void on_off_event(uint8_t note, uint8_t header){
     Serial.print(controller);
     Serial.print(",");
     Serial.println(bit);
-    if (controller ==0){
+    if (controller ==3){
       Serial.print("return");
       HCPCA9685.Servo(bit, 240);
+    }
+    else if (controller ==2){
+      Serial.print("return");
+      HCPCA9685_2.Servo(bit, 240);
     }
 
   }
@@ -62,9 +68,13 @@ void on_off_event(uint8_t note, uint8_t header){
     Serial.print(controller);
     Serial.print(",");
     Serial.println(bit);
-    if (controller ==0){
+    if (controller ==3){
       Serial.print("return");
       HCPCA9685.Servo(bit, 0);
+    }
+    else if (controller ==2){
+      Serial.print("return");
+      HCPCA9685_2.Servo(bit, 0);
     }
   }
 }

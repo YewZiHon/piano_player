@@ -1,13 +1,22 @@
 #include <Wire.h>
 #include "HCPCA9685.h"
+#include "HCPCA9685_0.h"
+#include "HCPCA9685_1.h"
 #include "HCPCA9685_2.h"
+#include "HCPCA9685_4.h"
+#include "HCPCA9685_5.h"
 #include "MIDIUSB.h"
 #define SERVO_ON 307
 #define SERVO_OFF 205
 #define SERVO_FREQ 50
 
+
+HCPCA9685_0 HCPCA9685_0(0x40);
+HCPCA9685_1 HCPCA9685_1(0x41);
 HCPCA9685 HCPCA9685(0x44);
 HCPCA9685_2 HCPCA9685_2(0x42);
+HCPCA9685_5 HCPCA9685_5(0x50);
+HCPCA9685_4 HCPCA9685_4(0x48);
 
 void setup() {
   Serial.begin(115200);
@@ -15,8 +24,20 @@ void setup() {
   HCPCA9685.Init(SERVO_MODE);
   HCPCA9685.Sleep(false);
 
+  HCPCA9685_0.Init(SERVO_MODE);
+  HCPCA9685_0.Sleep(false);
+
+  HCPCA9685_1.Init(SERVO_MODE);
+  HCPCA9685_1.Sleep(false);
+
   HCPCA9685_2.Init(SERVO_MODE);
   HCPCA9685_2.Sleep(false);
+
+  HCPCA9685_4.Init(SERVO_MODE);
+  HCPCA9685_4.Sleep(false);
+
+  HCPCA9685_5.Init(SERVO_MODE);
+  HCPCA9685_5.Sleep(false);
 
   delay(10);
 }
@@ -61,6 +82,22 @@ void on_off_event(uint8_t note, uint8_t header){
       Serial.print("return");
       HCPCA9685_2.Servo(bit, 240);
     }
+    else if (controller ==4){
+      Serial.print("return");
+      HCPCA9685_4.Servo(bit, 240);
+    }
+    else if (controller ==5){
+      Serial.print("return");
+      HCPCA9685_5.Servo(bit, 240);
+    }
+    else if (controller ==1){
+      Serial.print("return");
+      HCPCA9685_1.Servo(bit, 240);
+    }
+    else if (controller ==0){
+      Serial.print("return");
+      HCPCA9685_0.Servo(bit, 240);
+    }
 
   }
   if (header == 0x8){// if off
@@ -75,6 +112,22 @@ void on_off_event(uint8_t note, uint8_t header){
     else if (controller ==2){
       Serial.print("return");
       HCPCA9685_2.Servo(bit, 0);
+    }
+    else if (controller ==4){
+      Serial.print("return");
+      HCPCA9685_4.Servo(bit, 0);
+    }
+    else if (controller ==5){
+      Serial.print("return");
+      HCPCA9685_5.Servo(bit, 0);
+    }
+    else if (controller ==1){
+      Serial.print("return");
+      HCPCA9685_1.Servo(bit, 0);
+    }
+    else if (controller ==0){
+      Serial.print("return");
+      HCPCA9685_0.Servo(bit, 0);
     }
   }
 }
